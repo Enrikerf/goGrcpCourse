@@ -23,6 +23,6 @@ func main() {
 	proto.RegisterGreetServiceServer(s, &server{})
 
 	if error := s.Serve(listener); error != nil {
-		log.Fatalf("falta")
+		log.Fatalf("fatal")
 	}
 }
