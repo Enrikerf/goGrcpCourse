@@ -1,10 +1,10 @@
 package main
 
 import (
+	"calculatorpb"
 	"context"
 	"fmt"
 	"log"
-	"proto"
 
 	"google.golang.org/grpc"
 )
@@ -18,19 +18,17 @@ func main() {
 	}
 	defer connection.Close()
 
-	client := proto.NewGreetServiceClient(connection)
+	client := calculatorpb.NewCalculatorServiceClient(connection)
 	doUnary(client)
 }
 
-func doUnary(client proto.GreetServiceClient) {
-	request := &proto.GreetRequest{
-		Greeting: &proto.Greeting{
-			FirstName: "name",
-			LastName:  "last",
-		},
+func doUnary(client calculatorpb.CalculatorServiceClient) {
+	request := &calculatorpb.SumRequest{
+		FirstNumber:  1,
+		SecondNumber: 2,
 	}
 
-	response, error := client.Greet(context.Background(), request)
+	response, error := client.Sum(context.Background(), request)
 	if error != nil {
 		log.Fatalf("error %v", error)
 	}
