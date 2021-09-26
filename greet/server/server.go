@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
+	"time"
 
 	"proto"
 
@@ -21,6 +23,20 @@ func (*server) Greet(ctx context.Context, in *proto.GreetRequest) (*proto.GreetR
 		Result: result,
 	}
 	return respose, nil
+}
+
+func (*server) GreetManyTimes(req *proto.GreetManyTimesRequest, stream proto.GreetService_GreetManyTimesServer) error {
+	fmt.Printf("greet many times function was invoked with %v\n", req)
+	firstName := req.GetGreeting().GetFirstName()
+	for i := 0; i < 10; i++ {
+		result := "Hello " + firstName + " number " + strconv.Itoa(i)
+		response := &proto.GreetManyTimesResponse{
+			Result: result,
+		}
+		stream.Send(response)
+		time.Sleep(100 * time.Millisecond)
+	}
+	return nil
 }
 
 func main() {

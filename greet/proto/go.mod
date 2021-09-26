@@ -1,10 +1,10 @@
-module github.com/enrikerf/grcpGoProof/greed/server
+module proto
 
 go 1.17
 
 require (
 	google.golang.org/grpc v1.41.0
-	proto v1.0.0
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -13,7 +13,4 @@ require (
 	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd // indirect
 	golang.org/x/text v0.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 )
-
-replace proto v1.0.0 => ../proto
