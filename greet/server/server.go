@@ -59,6 +59,30 @@ func (*server) LongGreet(stream proto.GreetService_LongGreetServer) error {
 
 }
 
+func (*server) GreetEveryone(stream proto.GreetService_GreetEveryoneServer) error {
+	fmt.Println("Hi everyone")
+
+	for {
+		request, error := stream.Recv()
+		if error == io.EOF {
+			return nil
+		}
+		if error != nil {
+			log.Fatalf("error")
+			return error
+		}
+		result := "Hello " + request.GetGreeting().GetFirstName() + "! "
+		sendError := stream.Send(&proto.GreetEveryoneResponse{
+			Result: result,
+		})
+		if sendError != nil {
+			log.Fatalf("error")
+			return sendError
+		}
+	}
+
+}
+
 func main() {
 	fmt.Println("Hello world")
 

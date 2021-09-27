@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"proto"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -20,9 +21,10 @@ func main() {
 	defer connection.Close()
 
 	client := proto.NewGreetServiceClient(connection)
-	doUnary(client)
-	doServerStreaming(client)
-	doClientStreaming(client)
+	// doUnary(client)
+	// doServerStreaming(client)
+	// doClientStreaming(client)
+	doBiDirectional(client)
 
 }
 
@@ -99,5 +101,60 @@ func doClientStreaming(client proto.GreetServiceClient) {
 	if error != nil {
 		log.Fatalf("error")
 	}
-	fmt.Printf("response %v", response)
+	fmt.Println("response %v", response)
+}
+
+func doBiDirectional(client proto.GreetServiceClient) {
+	fmt.Println("bidi")
+
+	// we create stream by invoking the client
+	stream, error := client.GreetEveryone(context.Background())
+	if error != nil {
+		log.Fatalf("error")
+		return
+	}
+	requests := []*proto.GreetEveryoneRequest{
+		&proto.GreetEveryoneRequest{
+			Greeting: &proto.Greeting{
+				FirstName: "pepe",
+			},
+		},
+		&proto.GreetEveryoneRequest{
+			Greeting: &proto.Greeting{
+				FirstName: "john",
+			},
+		},
+		&proto.GreetEveryoneRequest{
+			Greeting: &proto.Greeting{
+				FirstName: "manuel",
+			},
+		},
+	}
+	waitChannel := make(chan struct{})
+	// we send a bunch of messages to de client go routin
+	go func() {
+		for _, request := range requests {
+			fmt.Println("sending message %v", request)
+			stream.Send(request)
+			time.Sleep(1000 * time.Microsecond)
+		}
+		stream.CloseSend()
+	}()
+	// we receive a bunch of messages form the client go routine
+	go func() {
+		for {
+			response, error := stream.Recv()
+			if error == io.EOF {
+				break
+			}
+			if error != nil {
+				log.Fatalf("error")
+				break
+			}
+			fmt.Println("received: %v", response.GetResult())
+		}
+		close(waitChannel)
+	}()
+	//block until everyhting is done
+	<-waitChannel
 }
