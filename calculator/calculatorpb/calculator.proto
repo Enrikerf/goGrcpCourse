@@ -9,9 +9,18 @@ service CalculatorService{
     rpc Sum(SumRequest) returns (SumResponse) {};
     rpc PrimeDecomposition(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse) {};
     rpc Average(stream AverageRequest) returns ( AverageResponse) {};
+    rpc FindMaximum(stream FindMaximumRequest) returns ( stream FindMaximumResponse) {};
 
 }; 
 
+message FindMaximumRequest{
+    int32 number = 1;
+}
+
+message FindMaximumResponse{
+    int32 maximum = 1;
+
+}
 message PrimeDecompositionRequest{
     int32 prime_number = 1;
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -23,6 +24,7 @@ func main() {
 	doUnary(client)
 	doPrimeDecomposition(client)
 	doClientStreaming(client)
+	doFindMaximumBidirectional(client)
 }
 
 func doUnary(client calculatorpb.CalculatorServiceClient) {
@@ -87,4 +89,56 @@ func doClientStreaming(client calculatorpb.CalculatorServiceClient) {
 		log.Fatalf("error")
 	}
 	fmt.Printf("response: %v", response)
+}
+
+func doFindMaximumBidirectional(client calculatorpb.CalculatorServiceClient) {
+	fmt.Println("find maximum")
+
+	// we create stream by invoking the client
+	stream, error := client.FindMaximum(context.Background())
+	if error != nil {
+		log.Fatalf("error")
+		return
+	}
+	requests := []*calculatorpb.FindMaximumRequest{
+		&calculatorpb.FindMaximumRequest{
+			Number: 1,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 3,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 2,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 4,
+		},
+	}
+	waitChannel := make(chan struct{})
+	// we send a bunch of messages to de client go routin
+	go func() {
+		for _, request := range requests {
+			fmt.Println("sending message %v", request)
+			stream.Send(request)
+			time.Sleep(1000 * time.Microsecond)
+		}
+		stream.CloseSend()
+	}()
+	// we receive a bunch of messages form the client go routine
+	go func() {
+		for {
+			response, error := stream.Recv()
+			if error == io.EOF {
+				break
+			}
+			if error != nil {
+				log.Fatalf("error")
+				break
+			}
+			fmt.Println("received: %v", response)
+		}
+		close(waitChannel)
+	}()
+	//block until everyhting is done
+	<-waitChannel
 }
