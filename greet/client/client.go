@@ -21,8 +21,8 @@ func main() {
 
 	client := proto.NewGreetServiceClient(connection)
 	doUnary(client)
-
 	doServerStreaming(client)
+	doClientStreaming(client)
 
 }
 
@@ -65,5 +65,39 @@ func doServerStreaming(client proto.GreetServiceClient) {
 		msg.GetResult()
 		log.Printf("response %v", msg.GetResult())
 	}
+}
 
+func doClientStreaming(client proto.GreetServiceClient) {
+	fmt.Println("starting client streaming rpc")
+	requests := []*proto.LongGreetRequest{
+		&proto.LongGreetRequest{
+			Greeting: &proto.Greeting{
+				FirstName: "pepe",
+			},
+		},
+		&proto.LongGreetRequest{
+			Greeting: &proto.Greeting{
+				FirstName: "john",
+			},
+		},
+		&proto.LongGreetRequest{
+			Greeting: &proto.Greeting{
+				FirstName: "manuel",
+			},
+		},
+	}
+	stream, error := client.LongGreet(context.Background())
+	if error != nil {
+		log.Fatalf("error")
+	}
+	for _, request := range requests {
+		fmt.Printf("sending: %v\n", request)
+		stream.Send(request)
+	}
+
+	response, error := stream.CloseAndRecv()
+	if error != nil {
+		log.Fatalf("error")
+	}
+	fmt.Printf("response %v", response)
 }
