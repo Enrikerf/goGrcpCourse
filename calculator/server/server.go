@@ -4,6 +4,7 @@ import (
 	"calculatorpb"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -37,6 +38,25 @@ func (*server) PrimeDecomposition(request *calculatorpb.PrimeDecompositionReques
 		}
 	}
 	return nil
+}
+
+func (*server) Average(stream calculatorpb.CalculatorService_AverageServer) error {
+	fmt.Printf("average invoked")
+	var nNumbers int32 = 0
+	var sum int32 = 0
+	for {
+		request, error := stream.Recv()
+		if error == io.EOF {
+			return stream.SendAndClose(&calculatorpb.AverageResponse{
+				Average: sum / nNumbers,
+			})
+		}
+		if error != nil {
+			log.Fatalf("error")
+		}
+		sum += request.GetNumber()
+		nNumbers++
+	}
 }
 
 func main() {
