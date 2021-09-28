@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -24,7 +26,9 @@ func main() {
 	// doUnary(client)
 	// doServerStreaming(client)
 	// doClientStreaming(client)
-	doBiDirectional(client)
+	// doBiDirectional(client)
+	doUnaryWithDeadline(client, 5*time.Second)
+	doUnaryWithDeadline(client, 1*time.Second)
 
 }
 
@@ -157,4 +161,28 @@ func doBiDirectional(client proto.GreetServiceClient) {
 	}()
 	//block until everyhting is done
 	<-waitChannel
+}
+
+func doUnaryWithDeadline(client proto.GreetServiceClient, timeout time.Duration) {
+	request := &proto.GreetWithDeadLineRequest{
+		Greeting: &proto.Greeting{
+			FirstName: "name",
+			LastName:  "last",
+		},
+	}
+	context, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	response, error := client.GreetWithDeadLine(context, request)
+	if error != nil {
+		statusError, ok := status.FromError(error)
+		if ok {
+			if statusError.Code() == codes.DeadlineExceeded {
+				fmt.Println("timeout %v", error)
+			}
+		} else {
+			log.Fatalf("unexpected %v", error)
+		}
+		return
+	}
+	log.Printf("response %v", response)
 }
