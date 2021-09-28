@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -25,6 +27,7 @@ func main() {
 	doPrimeDecomposition(client)
 	doClientStreaming(client)
 	doFindMaximumBidirectional(client)
+	doErrorUnary(client)
 }
 
 func doUnary(client calculatorpb.CalculatorServiceClient) {
@@ -141,4 +144,26 @@ func doFindMaximumBidirectional(client calculatorpb.CalculatorServiceClient) {
 	}()
 	//block until everyhting is done
 	<-waitChannel
+}
+
+func doErrorUnary(client calculatorpb.CalculatorServiceClient) {
+	request := &calculatorpb.SquareRootRequest{
+		Number: -10,
+	}
+
+	response, error := client.SquareRoot(context.Background(), request)
+	if error != nil {
+		responseError, ok := status.FromError(error)
+		if ok {
+			fmt.Println(responseError.Message())
+			fmt.Println(responseError.Code())
+			if responseError.Code() == codes.InvalidArgument {
+				fmt.Println("we sent negative number")
+			}
+		} else {
+			log.Fatalln("error %v", error)
+		}
+
+	}
+	log.Printf("response %v", response)
 }
