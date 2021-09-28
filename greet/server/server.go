@@ -12,6 +12,8 @@ import (
 	"proto"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type server struct{}
@@ -56,7 +58,6 @@ func (*server) LongGreet(stream proto.GreetService_LongGreetServer) error {
 		firstName := request.GetGreeting().GetFirstName()
 		result += "Hello " + firstName + "! "
 	}
-
 }
 
 func (*server) GreetEveryone(stream proto.GreetService_GreetEveryoneServer) error {
@@ -81,6 +82,23 @@ func (*server) GreetEveryone(stream proto.GreetService_GreetEveryoneServer) erro
 		}
 	}
 
+}
+
+func (*server) GreetWithDeadLine(ctx context.Context, request *proto.GreetWithDeadLineRequest) (*proto.GreetWithDeadLineResponse, error) {
+	fmt.Printf("greet with deadline function was invoked with %v\n", request)
+	for i := 0; i < 3; i++ {
+		if ctx.Err() == context.DeadlineExceeded {
+			fmt.Println("client canceled the request")
+			return nil, status.Error(codes.Canceled, "the client canceled the request")
+		}
+		time.Sleep(1 * time.Second)
+	}
+	firstName := request.GetGreeting().GetFirstName()
+	result := "hello nodeadline: " + firstName
+	respose := &proto.GreetWithDeadLineResponse{
+		Result: result,
+	}
+	return respose, nil
 }
 
 func main() {

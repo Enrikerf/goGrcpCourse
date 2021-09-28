@@ -10,9 +10,6 @@ service CalculatorService{
     rpc PrimeDecomposition(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse) {};
     rpc Average(stream AverageRequest) returns ( AverageResponse) {};
     rpc FindMaximum(stream FindMaximumRequest) returns ( stream FindMaximumResponse) {};
-
-    // error handling
-    // this RPC will throw an exception if the sent number is negative
     // the error being sent is of type INVALID_ARGUMENT
     rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse){};
 }; 

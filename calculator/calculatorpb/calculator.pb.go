@@ -780,8 +780,6 @@ type CalculatorServiceClient interface {
 	PrimeDecomposition(ctx context.Context, in *PrimeDecompositionRequest, opts ...grpc.CallOption) (CalculatorService_PrimeDecompositionClient, error)
 	Average(ctx context.Context, opts ...grpc.CallOption) (CalculatorService_AverageClient, error)
 	FindMaximum(ctx context.Context, opts ...grpc.CallOption) (CalculatorService_FindMaximumClient, error)
-	// error handling
-	// this RPC will throw an exception if the sent number is negative
 	// the error being sent is of type INVALID_ARGUMENT
 	SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error)
 }
@@ -916,8 +914,6 @@ type CalculatorServiceServer interface {
 	PrimeDecomposition(*PrimeDecompositionRequest, CalculatorService_PrimeDecompositionServer) error
 	Average(CalculatorService_AverageServer) error
 	FindMaximum(CalculatorService_FindMaximumServer) error
-	// error handling
-	// this RPC will throw an exception if the sent number is negative
 	// the error being sent is of type INVALID_ARGUMENT
 	SquareRoot(context.Context, *SquareRootRequest) (*SquareRootResponse, error)
 }
