@@ -10,25 +10,32 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
 func main() {
 	fmt.Println("hello I'm a client")
 
-	connection, error := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	certFile := "../../ssl/ca.crt"
+	credentials, sslError := credentials.NewClientTLSFromFile(certFile, "")
+	if sslError != nil {
+		log.Fatalf("error: %v", sslError)
+	}
+	options := grpc.WithTransportCredentials(credentials)
+	connection, error := grpc.Dial("localhost:50051", options)
 	if error != nil {
 		log.Fatalf("error: %v", error)
 	}
 	defer connection.Close()
 
 	client := proto.NewGreetServiceClient(connection)
-	// doUnary(client)
+	doUnary(client)
 	// doServerStreaming(client)
 	// doClientStreaming(client)
 	// doBiDirectional(client)
-	doUnaryWithDeadline(client, 5*time.Second)
-	doUnaryWithDeadline(client, 1*time.Second)
+	// doUnaryWithDeadline(client, 5*time.Second)
+	// doUnaryWithDeadline(client, 1*time.Second)
 
 }
 
