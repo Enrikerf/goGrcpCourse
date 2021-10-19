@@ -109,15 +109,20 @@ func main() {
 	if error != nil {
 		log.Fatalf("failed to listen")
 	}
-	certificate := "../../ssl/server.crt"
-	keyFile := "../../ssl/server.pem"
-	credentials, sslError := credentials.NewServerTLSFromFile(certificate, keyFile)
-	if sslError != nil {
-		log.Fatalf("error: %v", sslError)
-		return
+	tlsEnabled := true
+	var serverOptions grpc.ServerOption
+	if tlsEnabled {
+		certificate := "../../ssl/server.crt"
+		keyFile := "../../ssl/server.pem"
+		credentials, sslError := credentials.NewServerTLSFromFile(certificate, keyFile)
+		if sslError != nil {
+			log.Fatalf("error: %v", sslError)
+			return
+		}
+		serverOptions = grpc.Creds(credentials)
 	}
-	options := grpc.Creds(credentials)
-	s := grpc.NewServer(options)
+
+	s := grpc.NewServer(serverOptions)
 	proto.RegisterGreetServiceServer(s, &server{})
 
 	if error := s.Serve(listener); error != nil {
