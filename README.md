@@ -33,3 +33,7 @@ Call to a function to run as a command
     call Sum
 
 if you call a function biStream control+D to exit
+
+## Mongo
+
+setup
