@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -113,6 +114,8 @@ func main() {
 	s := grpc.NewServer()
 	calculatorpb.RegisterCalculatorServiceServer(s, &server{})
 
+	//reflection to expose the api doc and commands
+	reflection.Register(s)
 	if error := s.Serve(listener); error != nil {
 		log.Fatalf("fatal")
 	}
