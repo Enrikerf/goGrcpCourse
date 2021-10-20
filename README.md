@@ -36,4 +36,4 @@ if you call a function biStream control+D to exit
 
 ## Mongo
 
-setup
+setup in /docker/mongo/
