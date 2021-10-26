@@ -7,7 +7,7 @@
 
 
     $ sudo apt-get install protobuf-compiler
-
+    $ go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
 
 
 
