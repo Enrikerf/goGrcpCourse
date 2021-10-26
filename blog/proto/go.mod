@@ -1,3 +1,3 @@
-module github.com/enrikerf/grcpGoProof/blog/proto
+module blog
 
 go 1.17

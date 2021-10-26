@@ -3,9 +3,16 @@
 
 [reference](https://www.udemy.com/course/grpc-golang/)
 
+### install protobuf
 
 
-install evans:
+    $ sudo apt-get install protobuf-compiler
+
+
+
+
+
+### install evans:
 
     $ brew tap ktr0731/evans
     $ brew install evans
