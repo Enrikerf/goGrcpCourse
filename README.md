@@ -3,9 +3,16 @@
 
 [reference](https://www.udemy.com/course/grpc-golang/)
 
+### install protobuf
 
 
-install evans:
+    $ sudo apt-get install protobuf-compiler
+    $ go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
+
+
+
+
+### install evans:
 
     $ brew tap ktr0731/evans
     $ brew install evans
@@ -33,3 +40,7 @@ Call to a function to run as a command
     call Sum
 
 if you call a function biStream control+D to exit
+
+## Mongo
+
+setup in /docker/mongo/
