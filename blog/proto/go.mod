@@ -1,3 +1,3 @@
-module blog
+module proto
 
-go 1.17
+go 1.15

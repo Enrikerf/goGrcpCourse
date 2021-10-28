@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 
-	"github.com/enrikerf/grcpGoProof/blog/proto"
+	"proto"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
+
+type Server struct {
+}
 
 func main() {
 	fmt.Println("Hello world")
@@ -18,23 +22,25 @@ func main() {
 	if error != nil {
 		log.Fatalf("failed to listen")
 	}
-	tlsEnabled := true
-	var serverOptions grpc.ServerOption
-	if tlsEnabled {
-		certificate := "../../ssl/server.crt"
-		keyFile := "../../ssl/server.pem"
-		credentials, sslError := credentials.NewServerTLSFromFile(certificate, keyFile)
-		if sslError != nil {
-			log.Fatalf("error: %v", sslError)
-			return
+
+	serverOptions := []grpc.ServerOption{}
+	server := grpc.NewServer(serverOptions...)
+	proto.RegisterBlogServiceServer(server, &Server{})
+
+	go func() {
+		fmt.Println("Starting Server...")
+		if error := server.Serve(listener); error != nil {
+			log.Fatalf("fatal")
 		}
-		serverOptions = grpc.Creds(credentials)
-	}
+	}()
 
-	s := grpc.NewServer(serverOptions)
-	proto.Register(s, &server{})
+	// Wait for control C to exit
+	channel := make(chan os.Signal, 1)
+	signal.Notify(channel, os.Interrupt)
 
-	if error := s.Serve(listener); error != nil {
-		log.Fatalf("fatal")
-	}
+	// Bock until a signal is received
+	<-channel
+	server.Stop()
+	fmt.Println("closing the listener")
+	listener.Close()
 }
