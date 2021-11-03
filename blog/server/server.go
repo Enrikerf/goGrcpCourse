@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,6 +21,30 @@ import (
 var collection *mongo.Collection
 
 type Server struct {
+}
+
+func (server *Server) ReadBlog(ctx context.Context, request *proto.ReadBlogRequest) (*proto.ReadBlogResponse, error) {
+	fmt.Println("Read request")
+	blogIdString := request.GetBlogId()
+	objectId, err := primitive.ObjectIDFromHex(blogIdString)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("cannot parse id"))
+	}
+	data := &blogItem{}
+	filter := bson.D{{"_id",objectId}}
+	result := collection.FindOne(context.Background(),filter)
+	if err := result.Decode(data); err != nil {
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("not found"))
+	}
+
+	return &proto.ReadBlogResponse{Blog: &proto.Blog{
+		Id: data.ID.String(),
+		AuthorId: data.AuthorID,
+		Content: data.Content,
+		Title: data.Title,
+	}}, err
+
+
 }
 
 func (server *Server) CreateBlog(ctx context.Context, request *proto.CreateBlogRequest) (*proto.CreateBlogResponse, error) {
