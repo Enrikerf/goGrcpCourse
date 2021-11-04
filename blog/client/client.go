@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	"io"
 	"log"
 	"proto"
 )
@@ -19,9 +20,29 @@ func main() {
 	defer connection.Close()
 	client := proto.NewBlogServiceClient(connection)
 	//insertBlog(client)
-	readBlog(client)
-	updateBlog(client)
-	deleteBlog(client)
+	//readBlog(client)
+	//updateBlog(client)
+	//deleteBlog(client)
+	listBlogs(client)
+}
+
+func listBlogs(client proto.BlogServiceClient) {
+	request := &proto.ListBlogRequest{}
+	responseStream, err := client.ListBlog(context.Background(), request)
+
+	if err != nil {
+		log.Fatalf("error %v", err)
+	}
+	for {
+		msg, err := responseStream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Printf("response %v", err)
+		}
+		log.Printf("response %v", msg)
+	}
 }
 
 func deleteBlog(client proto.BlogServiceClient) {
