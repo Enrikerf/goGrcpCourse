@@ -23,6 +23,36 @@ var collection *mongo.Collection
 type Server struct {
 }
 
+func (server *Server) ListBlog(request *proto.ListBlogRequest, server2 proto.BlogService_ListBlogServer) error {
+	fmt.Println("List request")
+	cursor, err := collection.Find(context.Background(), bson.D{})
+	if err != nil {
+		return status.Errorf(codes.Internal, fmt.Sprintf("mongo error: %v", err))
+	}
+	defer cursor.Close(context.Background())
+	for cursor.Next(context.Background()) {
+		data := &blogItem{}
+		err = cursor.Decode(data)
+		if err != nil {
+			return status.Errorf(codes.Internal, fmt.Sprintf("cant decode"))
+		}
+		err := server2.Send(&proto.ListBlogResponse{Blog: &proto.Blog{
+			Id:       data.ID.String(),
+			AuthorId: data.AuthorID,
+			Content:  data.Content,
+			Title:    data.Title,
+		}})
+		if err != nil {
+			return status.Errorf(codes.Internal, fmt.Sprintf("send error %v", err))
+		}
+	}
+
+	if err := cursor.Err(); err != nil {
+		return status.Errorf(codes.Internal, fmt.Sprintf("cursor error %v", err))
+	}
+	return nil
+}
+
 func (server *Server) DeleteBlog(ctx context.Context, request *proto.DeleteBlogRequest) (*proto.DeleteBlogResponse, error) {
 	fmt.Println("Delete request")
 	blogIdString := request.GetBlogId()
