@@ -23,6 +23,24 @@ var collection *mongo.Collection
 type Server struct {
 }
 
+func (server *Server) DeleteBlog(ctx context.Context, request *proto.DeleteBlogRequest) (*proto.DeleteBlogResponse, error) {
+	fmt.Println("Delete request")
+	blogIdString := request.GetBlogId()
+	objectId, err := primitive.ObjectIDFromHex(blogIdString)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("cannot parse id"))
+	}
+	filter := bson.D{{"_id", objectId}}
+	result, err := collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("mongo err"))
+	}
+	if result.DeletedCount == 0 {
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("not found"))
+	}
+	return &proto.DeleteBlogResponse{BlogId: blogIdString}, err
+}
+
 func (server *Server) UpdateBlog(ctx context.Context, request *proto.UpdateBlogRequest) (*proto.UpdateBlogResponse, error) {
 	fmt.Println("Update request")
 	blog := request.GetBlog()

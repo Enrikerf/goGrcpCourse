@@ -21,6 +21,18 @@ func main() {
 	//insertBlog(client)
 	readBlog(client)
 	updateBlog(client)
+	deleteBlog(client)
+}
+
+func deleteBlog(client proto.BlogServiceClient) {
+	deleteBlogRequest := proto.DeleteBlogRequest{
+		BlogId: "617d03b51677ccfc7ec5a9bd",
+	}
+	deleteBlogResponse, err := client.DeleteBlog(context.Background(), &deleteBlogRequest)
+	if err != nil {
+		log.Fatalf("error %v", err)
+	}
+	fmt.Println("blog %v", deleteBlogResponse)
 }
 
 func updateBlog(client proto.BlogServiceClient) {
