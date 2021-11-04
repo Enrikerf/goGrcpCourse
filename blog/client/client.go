@@ -20,6 +20,21 @@ func main() {
 	client := proto.NewBlogServiceClient(connection)
 	//insertBlog(client)
 	readBlog(client)
+	updateBlog(client)
+}
+
+func updateBlog(client proto.BlogServiceClient) {
+	blog := proto.Blog{
+		Id: "617d03b51677ccfc7ec5a9bd",
+		AuthorId: "Enrique",
+		Title:    "Linea de costa",
+		Content:  "no apisona",
+	}
+	createdBlog, err := client.UpdateBlog(context.Background(), &proto.UpdateBlogRequest{Blog: &blog})
+	if err != nil {
+		log.Fatalf("error %v", err)
+	}
+	fmt.Println("blog %v", createdBlog)
 }
 
 func insertBlog(client proto.BlogServiceClient) {
