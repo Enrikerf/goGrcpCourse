@@ -23,6 +23,37 @@ var collection *mongo.Collection
 type Server struct {
 }
 
+func (server *Server) UpdateBlog(ctx context.Context, request *proto.UpdateBlogRequest) (*proto.UpdateBlogResponse, error) {
+	fmt.Println("Update request")
+	blog := request.GetBlog()
+	objectId, err := primitive.ObjectIDFromHex(blog.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("cannot parse id"))
+	}
+	data := &blogItem{}
+	filter := bson.D{{"_id", objectId}}
+	result := collection.FindOne(context.Background(), filter)
+	if err := result.Decode(data); err != nil {
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("not found"))
+	}
+
+	data.AuthorID = blog.AuthorId
+	data.Content = blog.Content
+	data.Title = blog.Title
+
+	_, err = collection.ReplaceOne(context.Background(), filter, data)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("cannot update"))
+	}
+	return &proto.UpdateBlogResponse{Blog: &proto.Blog{
+		Id:       data.ID.String(),
+		AuthorId: data.AuthorID,
+		Content:  data.Content,
+		Title:    data.Title,
+	}}, err
+
+}
+
 func (server *Server) ReadBlog(ctx context.Context, request *proto.ReadBlogRequest) (*proto.ReadBlogResponse, error) {
 	fmt.Println("Read request")
 	blogIdString := request.GetBlogId()
@@ -31,20 +62,17 @@ func (server *Server) ReadBlog(ctx context.Context, request *proto.ReadBlogReque
 		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("cannot parse id"))
 	}
 	data := &blogItem{}
-	filter := bson.D{{"_id",objectId}}
-	result := collection.FindOne(context.Background(),filter)
+	filter := bson.D{{"_id", objectId}}
+	result := collection.FindOne(context.Background(), filter)
 	if err := result.Decode(data); err != nil {
 		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("not found"))
 	}
-
 	return &proto.ReadBlogResponse{Blog: &proto.Blog{
-		Id: data.ID.String(),
+		Id:       data.ID.String(),
 		AuthorId: data.AuthorID,
-		Content: data.Content,
-		Title: data.Title,
+		Content:  data.Content,
+		Title:    data.Title,
 	}}, err
-
-
 }
 
 func (server *Server) CreateBlog(ctx context.Context, request *proto.CreateBlogRequest) (*proto.CreateBlogResponse, error) {
