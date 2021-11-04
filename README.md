@@ -44,3 +44,10 @@ if you call a function biStream control+D to exit
 ## Mongo
 
 setup in /docker/mongo/
+
+
+# Grcp gateway for expose restApi
+
+To expose the services as a rest api too you need install
+
+* [grpc-gatewaty](https://github.com/grpc-ecosystem/grpc-gateway)
