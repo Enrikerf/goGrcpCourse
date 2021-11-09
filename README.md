@@ -51,3 +51,7 @@ setup in /docker/mongo/
 To expose the services as a rest api too you need install
 
 * [grpc-gatewaty](https://github.com/grpc-ecosystem/grpc-gateway)
+
+# Info
+
+* [fork of grcp](https://github.com/gogo/protobuf)
