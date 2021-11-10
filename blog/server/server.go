@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blog/gen/proto"
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,13 +16,13 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"proto"
 )
 
 //make it global
 var collection *mongo.Collection
 
 type Server struct {
+	proto.UnimplementedBlogServiceServer
 }
 
 func (server *Server) ListBlog(request *proto.ListBlogRequest, server2 proto.BlogService_ListBlogServer) error {
@@ -175,7 +176,7 @@ func main() {
 	}
 	fmt.Println("Blog Service Started")
 	collection = client.Database("go_grcp_course_db").Collection("blog")
-	//ctx:= context.TODO()
+/*	//ctx:= context.TODO()
 	//client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	//defer func() {
 	//	if err = client.Disconnect(ctx); err != nil {
@@ -190,7 +191,7 @@ func main() {
 	//
 	//collection := client.Database("go_grcp_course").Collection("blog")
 	//fmt.Println("%v",collection)
-	// Mongo setup --------
+	// Mongo setup --------*/
 
 	listener, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"blog/gen/proto"
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
 	"io"
 	"log"
-	"proto"
 )
 
 func main() {
