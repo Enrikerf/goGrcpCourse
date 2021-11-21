@@ -3,6 +3,7 @@ syntax = "proto3";
 package main;
 option go_package = "./proto";
 
+import "google/api/annotations.proto";
 
 message Blog{
   string id = 1;
@@ -52,7 +53,12 @@ message ListBlogResponse{
 
 service BlogService{
   rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
-  rpc ReadBlog(ReadBlogRequest) returns (ReadBlogResponse); //return not found if not found
+  rpc ReadBlog(ReadBlogRequest) returns (ReadBlogResponse){
+    option (google.api.http) = {
+      get: "/echo/{blog_id}"
+      body: "*"
+    };
+  }; //return not found if not found
   rpc UpdateBlog(UpdateBlogRequest) returns (UpdateBlogResponse);
   rpc DeleteBlog(DeleteBlogRequest) returns (DeleteBlogResponse);
   rpc ListBlog(ListBlogRequest) returns (stream ListBlogResponse);

@@ -3,7 +3,9 @@ package main
 import (
 	"blog/gen/proto"
 	"context"
+	"flag"
 	"fmt"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,6 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 )
@@ -159,8 +162,26 @@ type blogItem struct {
 	Content  string             `bson:"content"`
 	Title    string             `bson:"title"`
 }
-
+var (
+	// command-line options:
+	// gRPC server endpoint
+	grpcServerEndpoint = flag.String("grpc-server-endpoint",  "localhost:9090/echo", "gRPC server endpoint")
+)
 func main() {
+	go func() error {
+		ctx := context.Background()
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+		mux := runtime.NewServeMux()
+
+		err := proto.RegisterBlogServiceHandlerServer(context.Background(), mux, &Server{})
+		if err != nil {
+			return err
+		}
+
+		// Start HTTP server (and proxy calls to gRPC server endpoint)
+		return http.ListenAndServe(":9090", mux)
+	}()
 	// if we crash the go code, we ge the file name and line number
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	fmt.Println("Hello world")
@@ -176,22 +197,22 @@ func main() {
 	}
 	fmt.Println("Blog Service Started")
 	collection = client.Database("go_grcp_course_db").Collection("blog")
-/*	//ctx:= context.TODO()
-	//client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-	//defer func() {
-	//	if err = client.Disconnect(ctx); err != nil {
-	//		panic(err)
-	//	}
-	//}()
-	//err = client.Ping(ctx, readpref.Primary())
-	//if err = client.Disconnect(ctx); err != nil {
-	//	fmt.Println("panic")
-	//	panic(err)
-	//}
-	//
-	//collection := client.Database("go_grcp_course").Collection("blog")
-	//fmt.Println("%v",collection)
-	// Mongo setup --------*/
+	/*	//ctx:= context.TODO()
+		//client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+		//defer func() {
+		//	if err = client.Disconnect(ctx); err != nil {
+		//		panic(err)
+		//	}
+		//}()
+		//err = client.Ping(ctx, readpref.Primary())
+		//if err = client.Disconnect(ctx); err != nil {
+		//	fmt.Println("panic")
+		//	panic(err)
+		//}
+		//
+		//collection := client.Database("go_grcp_course").Collection("blog")
+		//fmt.Println("%v",collection)
+		// Mongo setup --------*/
 
 	listener, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
