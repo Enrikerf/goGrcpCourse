@@ -41,12 +41,12 @@ Call to a function to run as a command
 
 if you call a function biStream control+D to exit
 
-## Mongo
+### Mongo
 
 setup in /docker/mongo/
 
 
-# Grcp gateway for expose restApi
+### Grcp gateway for expose restApi
 
 To expose the services as a rest api too you need install
 
@@ -55,3 +55,6 @@ To expose the services as a rest api too you need install
 # Info
 
 * [fork of grcp](https://github.com/gogo/protobuf)
+
+
+[Mind the notes](/blog/README.md)

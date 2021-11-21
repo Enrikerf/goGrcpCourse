@@ -11,3 +11,9 @@ protoc -I . --grpc-gateway_out ./gen/go \
 --grpc-gateway_opt paths=source_relative \
 --grpc-gateway_opt generate_unbound_methods=true \
 proto/blog.proto
+
+
+In Golang IDE to mind the imports of local protos (google downloaded files)
+
+![](./doc/settingsGolang.png)
+![](./doc/settingsGolang2.png)
